@@ -164,6 +164,88 @@ class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
 
     qsort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
+
+
+
+
+  // Bubble sort https://www.tutorialspoint.com/data_structures_algorithms/bubble_sort_algorithm.htm]]
+
+
+  "Bubble sort using 2" in {
+    // http://pawel-malczyk.pl/wordpress/?p=498
+
+    def bubbleSort(input: List[Int]): List[Int] = {
+      if (input != Nil && input.tail != Nil) {
+        if (input.head > input.tail.head) {
+          bubbleSort(List(input.tail.head, input.head) ::: input.tail.tail)
+        } else {
+          val sortResult = bubbleSort(input.tail)
+          if (input.head > sortResult.head) bubbleSort(List(sortResult.head, input.head) ::: sortResult.tail) else List(input.head) ::: sortResult
+        }
+      } else {
+        input
+      }
+    }
+
+    bubbleSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
+  }
+
+  "Bubble sort Ο(n^2) using 5" in {
+    // https://rosettacode.org/wiki/Sorting_algorithms/Bubble_sort#Scala
+
+    def bubbleSort(xt: List[Int]) = {
+      @tailrec
+      def bubble(xs: List[Int], rest: List[Int], sorted: List[Int]): List[Int] = xs match {
+        case x :: Nil =>
+          if (rest.isEmpty) x :: sorted
+          else bubble(rest, Nil, x :: sorted)
+        case a :: b :: xs =>
+          if (a > b) bubble(a :: xs, b :: rest, sorted)
+          else bubble(b :: xs, a :: rest, sorted)
+      }
+      bubble(xt, Nil, Nil)
+    }
+
+    bubbleSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
+  }
+
+
+
+
+
+  // https://interactivepython.org/runestone/static/pythonds/SortSearch/TheBinarySearch.html
+  // https://www.tutorialspoint.com/data_structures_algorithms/binary_search_algorithm.htm
+
+  "Binary search Ο(log n)" in {
+    // https://rosettacode.org/wiki/Binary_search#Scala
+
+    def binarySearch[A <% Ordered[A]](a: IndexedSeq[A], v: A) = {
+      def recurse(low: Int, high: Int): Option[Int] = (low + high) / 2 match {
+        case _ if high < low => None
+        case mid if a(mid) > v => recurse(low, mid - 1)
+        case mid if a(mid) < v => recurse(mid + 1, high)
+        case mid => Some(mid)
+      }
+      recurse(0, a.size - 1)
+    }
+
+    binarySearch(Vector(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4), 32) shouldEqual Some(8) // index
+  }
+
+  "Linear search Ο(n)" in {
+    // https://github.com/vkostyukov/scalacaster/blob/master/src/search/LinearSearch.scala
+
+    def linearsearch[A](list: List[A], key: A): Option[A] = {
+      def search(as: List[A]): Option[A] =
+        if (as.isEmpty) None
+        else if (as.head == key) Some(as.head)
+        else search(as.tail)
+
+      search(list)
+    }
+
+    linearsearch(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4), 32) shouldEqual Some(32) // finds element
+  }
 }
 
 // https://www.khanacademy.org/computing/computer-science/algorithms/merge-sort/a/divide-and-conquer-algorithms
