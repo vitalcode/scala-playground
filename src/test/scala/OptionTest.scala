@@ -2,9 +2,14 @@ import org.scalatest._
 
 class OptionTest extends FreeSpec with ShouldMatchers {
 
-  sealed trait FunOption[+T]
+  sealed trait FunOption[+T] {
 
-  case object FunNone extends FunOption[Nothing]
+    def isEmpty: Boolean
+  }
+
+  case object FunNone extends FunOption[Nothing] {
+    override def isEmpty: Boolean = true
+  }
 
   case class FunSome[+T](value: T) extends FunOption[T] {
     def map[A](fn: T => A): FunSome[A] = {
@@ -19,6 +24,8 @@ class OptionTest extends FreeSpec with ShouldMatchers {
       if (fn(value)) FunSome(value)
       else FunNone
     }
+
+    override def isEmpty: Boolean = false
   }
 
   "FunSome" - {
@@ -39,6 +46,15 @@ class OptionTest extends FreeSpec with ShouldMatchers {
 
       actual shouldEqual FunSome(1)
     }
+    "for comprehension with FunOption collection" in {
+      val actual = for {
+        e <- Seq(FunSome(1), FunSome(2), FunNone, FunSome(3))
+        if !e.isEmpty
+      } yield e
+
+      actual shouldEqual Seq(FunSome(1), FunSome(2), FunSome(3))
+    }
+   // "covariant test"
   }
 }
 

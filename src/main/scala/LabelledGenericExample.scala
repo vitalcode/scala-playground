@@ -5,33 +5,33 @@ import scala.reflect.ClassTag
 
 
 /** JSON ADT */
-sealed abstract class Json
+sealed abstract class FunJson
 
-final case class JsonObject(fields: List[(String, Json)]) extends Json
+final case class FunJsonObject(fields: List[(String, FunJson)]) extends FunJson
 
-final case class JsonArray(items: List[Json]) extends Json
+final case class FunJsonArray(items: List[FunJson]) extends FunJson
 
-final case class JsonString(value: String) extends Json
+final case class FunJsonString(value: String) extends FunJson
 
-final case class JsonNumber(value: Double) extends Json
+final case class FunJsonNumber(value: Double) extends FunJson
 
-final case class JsonBoolean(value: Boolean) extends Json
+final case class FunJsonBoolean(value: Boolean) extends FunJson
 
-case object JsonNull extends Json
+case object FunJsonNull$ extends FunJson
 
 
 /** Stringification methods */
-object Json {
-  def stringify(json: Json): String = json match {
-    case JsonObject(fields) => "{" + fields.map(stringifyField).mkString(",") + "}"
-    case JsonArray(items) => "[" + items.map(stringify).mkString(",") + "]"
-    case JsonString(value) => "\"" + escape(value) + "\""
-    case JsonNumber(value) => value.toString
-    case JsonBoolean(value) => value.toString
-    case JsonNull => "null"
+object FunJson {
+  def stringify(json: FunJson): String = json match {
+    case FunJsonObject(fields) => "{" + fields.map(stringifyField).mkString(",") + "}"
+    case FunJsonArray(items) => "[" + items.map(stringify).mkString(",") + "]"
+    case FunJsonString(value) => "\"" + escape(value) + "\""
+    case FunJsonNumber(value) => value.toString
+    case FunJsonBoolean(value) => value.toString
+    case FunJsonNull$ => "null"
   }
 
-  private def stringifyField(field: (String, Json)): String = {
+  private def stringifyField(field: (String, FunJson)): String = {
     val (name, value) = field
     escape(name) + ":" + stringify(value)
   }
@@ -45,7 +45,7 @@ object Json {
   * Type class for encoding a value of type A as JSON.
   */
 trait JsonEncoder[A] {
-  def encode(value: A): Json
+  def encode(value: A): FunJson
 }
 
 /**
@@ -60,44 +60,44 @@ trait JsonEncoder[A] {
   * is indeed an object.
   */
 trait JsonObjectEncoder[A] extends JsonEncoder[A] {
-  def encode(value: A): JsonObject
+  def encode(value: A): FunJsonObject
 }
 
 
 object JsonEncoder {
   /** Helper: create a JsonEncoder from a plain function */
-  def pure[A](func: A => Json): JsonEncoder[A] =
+  def pure[A](func: A => FunJson): JsonEncoder[A] =
   new JsonEncoder[A] {
-    def encode(value: A): Json =
+    def encode(value: A): FunJson =
       func(value)
   }
 
   /** Helper: create a JsonObjectEncoder from a plain function */
-  def pureObj[A](func: A => JsonObject): JsonObjectEncoder[A] =
+  def pureObj[A](func: A => FunJsonObject): JsonObjectEncoder[A] =
   new JsonObjectEncoder[A] {
-    def encode(value: A): JsonObject =
+    def encode(value: A): FunJsonObject =
       func(value)
   }
 
   // JsonEncoder instances for primitive types:
 
   implicit val stringEncoder: JsonEncoder[String] =
-    pure(str => JsonString(str))
+    pure(str => FunJsonString(str))
 
   implicit val intEncoder: JsonEncoder[Int] =
-    pure(num => JsonNumber(num))
+    pure(num => FunJsonNumber(num))
 
   implicit val doubleEncoder: JsonEncoder[Double] =
-    pure(num => JsonNumber(num))
+    pure(num => FunJsonNumber(num))
 
   implicit val booleanEncoder: JsonEncoder[Boolean] =
-    pure(bool => JsonBoolean(bool))
+    pure(bool => FunJsonBoolean(bool))
 
   implicit def optionEncoder[A](implicit encoder: JsonEncoder[A]): JsonEncoder[Option[A]] =
-    pure(opt => opt.map(encoder.encode).getOrElse(JsonNull))
+    pure(opt => opt.map(encoder.encode).getOrElse(FunJsonNull$))
 
   implicit def listEncoder[A](implicit encoder: JsonEncoder[A]): JsonEncoder[List[A]] =
-    pure(list => JsonArray(list.map(encoder.encode)))
+    pure(list => FunJsonArray(list.map(encoder.encode)))
 
   // JsonEncoder instances for HLists.
   //
@@ -112,7 +112,7 @@ object JsonEncoder {
   // the field name as a value.
 
   implicit val hnilEncoder: JsonObjectEncoder[HNil] =
-    pureObj(hnil => JsonObject(Nil))
+    pureObj(hnil => FunJsonObject(Nil))
 
   implicit def hlistEncoder[K <: Symbol, H, T <: HList](
                                                          implicit
@@ -124,7 +124,7 @@ object JsonEncoder {
       case h :: t =>
         val hField = witness.value.name -> hEncoder.value.encode(h)
         val tFields = tEncoder.encode(t).fields
-        JsonObject(hField :: tFields)
+        FunJsonObject(hField :: tFields)
     }
 
   // JsonEncoder instances for Coproducts:
@@ -143,7 +143,7 @@ object JsonEncoder {
                                                                  tEncoder: JsonObjectEncoder[T]
                                                                ): JsonObjectEncoder[FieldType[K, H] :+: T] =
     pureObj {
-      case Inl(h) => JsonObject(List(witness.value.name -> hEncoder.value.encode(h)))
+      case Inl(h) => FunJsonObject(List(witness.value.name -> hEncoder.value.encode(h)))
       case Inr(t) => tEncoder.encode(t)
     }
 
@@ -160,7 +160,7 @@ object JsonEncoder {
 object Main extends App {
   // Entry point for JsonEncoder:
 
-  def encodeJson[A](value: A)(implicit encoder: JsonEncoder[A]): Json =
+  def encodeJson[A](value: A)(implicit encoder: JsonEncoder[A]): FunJson =
     encoder.encode(value)
 
   sealed trait Shape
@@ -189,8 +189,8 @@ object Main extends App {
 
   println("Shapes " + shapes)
   println("Shapes as AST: " + encodeJson(shapes))
-  println("Shapes as JSON: " + Json.stringify(encodeJson(shapes)))
+  println("Shapes as JSON: " + FunJson.stringify(encodeJson(shapes)))
   println("Optional shapes " + optShapes)
   println("Optional shapes as AST: " + encodeJson(optShapes))
-  println("Optional shapes as JSON: " + Json.stringify(encodeJson(optShapes)))
+  println("Optional shapes as JSON: " + FunJson.stringify(encodeJson(optShapes)))
 }
