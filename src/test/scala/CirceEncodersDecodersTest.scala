@@ -69,7 +69,6 @@ class CirceEncodersDecodersTest extends FreeSpec with ShouldMatchers {
     //        }
   }
 
-k
   "auto: automatic derivation of encoder/decoder" - {
     "case class" in new Context {
 
