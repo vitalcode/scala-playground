@@ -15,6 +15,7 @@ val shapelessVersion = "2.3.2"
 val sprayJsonShapelessVersion = "1.3.0"
 val simulacrumVersion = "0.10.0"
 val scalaTestVersion = "2.2.5"
+val rxScala = "0.26.5"
 
 libraryDependencies ++= Seq(
   "io.spray" %% "spray-json" % sprayJsonVersion,
@@ -23,7 +24,8 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % scalazVersion,
   "com.chuusai" %% "shapeless" % shapelessVersion,
   "com.github.fommil" %% "spray-json-shapeless" % sprayJsonShapelessVersion,
-  "com.github.mpilquist" %% "simulacrum" % simulacrumVersion
+  "com.github.mpilquist" %% "simulacrum" % simulacrumVersion,
+  "io.reactivex" %% "rxscala" % rxScala
 )
 
 libraryDependencies ++= Seq(
