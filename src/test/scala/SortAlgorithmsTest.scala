@@ -109,15 +109,19 @@ class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
     // http://wuciawe.github.io/scala/algorithm/2014/09/03/merge-sort-implementation-in-scala.html
     // https://www.tutorialspoint.com/data_structures_algorithms/merge_sort_algorithm.htm
 
-    def msort[T <% Ordered[T]](xs: List[T]): List[T] = {
+    def msort(xs: List[Int]): List[Int] = {
 
       @tailrec
-      def merge(res: List[T], xs: List[T], ys: List[T]): List[T] = (xs, ys) match {
-        case (_, Nil) => res.reverse ::: xs
-        case (Nil, _) => res.reverse ::: ys
+      def merge(res: List[Int], xs: List[Int], ys: List[Int]): List[Int] = (xs, ys) match {
+        case (_, Nil) =>
+          res.reverse ::: xs
+        case (Nil, _) =>
+          res.reverse ::: ys
         case (x :: xs1, y :: ys1) =>
-          if (x < y) merge(x :: res, xs1, ys)
-          else merge(y :: res, xs, ys1)
+          if (x < y)
+            merge(x :: res, xs1, ys)
+          else
+            merge(y :: res, xs, ys1)
       }
 
       val n = xs.length / 2
@@ -153,7 +157,7 @@ class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
   "Quick sort using Scala partition" in {
     // http://stackoverflow.com/questions/2314526/a-generic-quicksort-in-scala
 
-    def qsort[T <% Ordered[T]](list: List[T]): List[T] = {
+    def qsort[T](list: List[Int]): List[Int] = {
       list match {
         case Nil => Nil
         case x :: xs =>

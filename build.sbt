@@ -16,6 +16,7 @@ val sprayJsonShapelessVersion = "1.3.0"
 val simulacrumVersion = "0.10.0"
 val scalaTestVersion = "2.2.5"
 val rxScala = "0.26.5"
+val json4sVersion = "3.5.2"
 
 libraryDependencies ++= Seq(
   "io.spray" %% "spray-json" % sprayJsonVersion,
@@ -25,7 +26,8 @@ libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % shapelessVersion,
   "com.github.fommil" %% "spray-json-shapeless" % sprayJsonShapelessVersion,
   "com.github.mpilquist" %% "simulacrum" % simulacrumVersion,
-  "io.reactivex" %% "rxscala" % rxScala
+  "io.reactivex" %% "rxscala" % rxScala,
+  "org.json4s" %% "json4s-jackson" % json4sVersion
 )
 
 libraryDependencies ++= Seq(
