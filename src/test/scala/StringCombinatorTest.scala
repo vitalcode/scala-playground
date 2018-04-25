@@ -1,5 +1,7 @@
 import org.scalatest.{FreeSpec, Matchers}
 
+import scala.annotation.tailrec
+
 class StringCombinatorTest extends FreeSpec with Matchers {
 
   "Combine fixed number of strings" in {
