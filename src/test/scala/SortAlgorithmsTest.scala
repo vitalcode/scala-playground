@@ -105,7 +105,7 @@ class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
     selectionSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
 
-  "Merge Sort" in {
+  "Merge Sort Ο(n log n)" in {
     // http://wuciawe.github.io/scala/algorithm/2014/09/03/merge-sort-implementation-in-scala.html
     // https://www.tutorialspoint.com/data_structures_algorithms/merge_sort_algorithm.htm
 
@@ -135,7 +135,7 @@ class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
     msort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
 
-  "Quick sort Ο(n log n)" in {
+  "Quick sort Ο(n log n) - Ο(n2)" in {
     // http://www.scala-lang.org/docu/files/ScalaByExample.pdf
     // https://www.khanacademy.org/computing/computer-science/algorithms/quick-sort/a/overview-of-quicksort
     // https://www.tutorialspoint.com/data_structures_algorithms/quick_sort_algorithm.htm
