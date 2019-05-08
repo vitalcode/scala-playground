@@ -1,7 +1,7 @@
-import org.scalatest._
 import TypeClass.Semigroup
+import org.scalatest._
 
-class TypeClassTest extends WordSpec with ShouldMatchers {
+class TypeClassTest extends WordSpec with Matchers {
 
   "Type class" when {
     "used to implement Semigroup for Int" should {

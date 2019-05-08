@@ -1,21 +1,13 @@
-import io.circe._
+import io.circe.{Json, _}
 import io.circe.parser._
 import io.circe.syntax._
-import cats.syntax.either._
-import com.typesafe.config.ConfigException.Generic
-import io.circe.Json
-import org.scalatest.{FreeSpec, ShouldMatchers}
-import shapeless.LabelledGeneric
+import org.scalatest.{FreeSpec, Matchers}
 
-class CirceEncodersDecodersTest extends FreeSpec with ShouldMatchers {
+class CirceEncodersDecodersTest extends FreeSpec with Matchers {
 
   case class Model(pString: String, pJson: String)
 
-  import io.circe.generic.auto._
-  import io.circe.generic.semiauto._
   import shapeless._
-  import shapeless.ops.record._
-  import shapeless.record.recordOps
 
 
   def createLabelledGeneric[A, HIn, HOut](x: LabelledGeneric.Aux[A, HIn])(f: HIn => HOut)(g: HOut => HIn) = new LabelledGeneric[A] {
@@ -34,20 +26,20 @@ class CirceEncodersDecodersTest extends FreeSpec with ShouldMatchers {
     j.noSpaces
   }
 
-  "json modification during encoding/decodering" - {
-    "using semiauto and custom LabelledGeneric for given model" in new Context {
-
-      import io.circe.generic.semiauto._
-
-      implicit val customModelGeneric = createLabelledGeneric(LabelledGeneric[Model])(_.updateWith('pJson)(stringToJson))(_.updateWith('pJson)(jsonToString))
-
-      implicit val modelEncode: Encoder[Model] = deriveEncoder
-      implicit val modelDecoder: Decoder[Model] = deriveDecoder
-
-      aModel.asJson shouldEqual aJsonDeep
-      aJsonDeep.as[Model].toOption.get shouldEqual aModel
-    }
-  }
+//  "json modification during encoding/decodering" - {
+//    "using semiauto and custom LabelledGeneric for given model" in new Context {
+//
+//      import io.circe.generic.semiauto._
+//
+//      implicit val customModelGeneric = createLabelledGeneric(LabelledGeneric[Model])(d => _.updateWith('pJson)(stringToJson))(_.updateWith('pJson)(jsonToString))
+//
+//      implicit val modelEncode: Encoder[Model] = deriveEncoder
+//      implicit val modelDecoder: Decoder[Model] = deriveDecoder
+//
+//      aModel.asJson shouldEqual aJsonDeep
+//      aJsonDeep.as[Model].toOption.get shouldEqual aModel
+//    }
+//  }
 
   "semiauto: derive encoder/decoder" - {
     import io.circe.generic.semiauto._

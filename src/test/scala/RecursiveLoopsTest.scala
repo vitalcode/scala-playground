@@ -1,6 +1,6 @@
 import org.scalatest._
 
-class RecursiveLoopsTest extends FreeSpec with ShouldMatchers {
+§class RecursiveLoopsTest extends FreeSpec with Matchers {
 
   "while Loop" in {
     def whileLoop(condition: => Boolean)(command: => Unit): Unit = {

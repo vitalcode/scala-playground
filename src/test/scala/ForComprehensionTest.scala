@@ -1,6 +1,6 @@
 import org.scalatest._
 
-class ForComprehensionTest extends FreeSpec with ShouldMatchers {
+class ForComprehensionTest extends FreeSpec with Matchers {
 
 
   "For Comprehension transformations" - {

@@ -1,7 +1,7 @@
 import org.scalatest._
 import scala.annotation.tailrec
 
-class SortAlgorithmsTest extends FreeSpec with ShouldMatchers {
+class SortAlgorithmsTest extends FreeSpec with Matchers {
 
   "Insertion sort: O(n^2)" - {
     "in-place comparison-based sorting algorithm, a sub-list is maintained which is always sorted" in {

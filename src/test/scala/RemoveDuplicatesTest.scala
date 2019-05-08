@@ -1,6 +1,6 @@
 import org.scalatest._
 
-class RemoveDuplicatesTest extends FreeSpec with ShouldMatchers {
+class RemoveDuplicatesTest extends FreeSpec with Matchers {
 
   def removeDuplicates[A](xs: List[A]): List[A] = {
     if (xs.isEmpty) xs

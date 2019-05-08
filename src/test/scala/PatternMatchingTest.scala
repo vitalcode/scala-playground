@@ -1,6 +1,6 @@
-import org.scalatest.{FreeSpec, ShouldMatchers}
+import org.scalatest.{FreeSpec, Matchers}
 
-class PatternMatchingTest extends FreeSpec with ShouldMatchers {
+class PatternMatchingTest extends FreeSpec with Matchers {
 
   "Case Classes and Pattern Matching" in {
 

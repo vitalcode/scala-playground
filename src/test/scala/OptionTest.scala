@@ -1,6 +1,6 @@
 import org.scalatest._
 
-class OptionTest extends FreeSpec with ShouldMatchers {
+class OptionTest extends FreeSpec with Matchers {
 
   sealed trait FunOption[+T] {
 
