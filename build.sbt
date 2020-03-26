@@ -15,6 +15,7 @@ val shapelessVersion = "2.3.3"
 val sprayJsonShapelessVersion = "1.3.0"
 val simulacrumVersion = "0.10.0"
 val scalaTestVersion = "3.0.5"
+val scalaMockVersion = "4.1.0"
 val rxScala = "0.26.5"
 val json4sVersion = "3.5.2"
 
@@ -39,5 +40,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-optics"
 ).map(_ % circeVersion)
 
-libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % scalaTestVersion % Test,
+  "org.scalamock" %% "scalamock" % scalaMockVersion % Test
+)
 

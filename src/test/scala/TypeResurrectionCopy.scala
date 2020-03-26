@@ -1,10 +1,97 @@
-import shapeless.labelled.FieldType
-import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, Inl, Inr, LabelledGeneric, Lazy, Witness}
+import org.scalatest.{FreeSpec, Matchers}
+import shapeless.{:+:, CNil, Coproduct, Generic, Inl, Inr, Lazy}
 
-import scala.reflect.ClassTag
+class TypeResurrectionCopy extends FreeSpec with Matchers {
+
+  sealed trait Puple
+
+  case class Boy(name: String) extends Puple
+
+  case class Girl(name: String, age: Int) extends Puple
+
+  trait Grade[T] {
+    def giveGrade(t: T, o: Int): String
+
+    def giveGender(t: T, a: Int, b: Int): String
+  }
+
+  def apply[T](t: T)(implicit grade: Grade[T]) = grade
+
+  def createGrade[T](giveGradeFn: (T, Int) => String,
+                     giveGenderFn: (T, Int, Int) => String): Grade[T] =
+    new Grade[T] {
+      def giveGrade(t: T, o: Int): String = giveGradeFn(t, o)
+
+      def giveGender(t: T, a: Int, b: Int): String = giveGenderFn(t, a, b)
+    }
+
+  implicit val cnil: Grade[CNil] = createGrade[CNil](
+    giveGradeFn = (_, _) => throw new Exception("Inconceivable!"),
+    giveGenderFn = (_, _, _) => throw new Exception("Inconceivable!")
+  )
+
+  implicit def coproduct[H, T <: Coproduct](implicit
+                                            hGrade: Lazy[Grade[H]],
+                                            tGrade: Grade[T]
+                                           ): Grade[:+:[H, T]] = {
+    createGrade[:+:[H, T]](
+      giveGradeFn = {
+        case (Inl(hh), i: Int) => hGrade.value.giveGrade(hh, i)
+        case (Inr(tt), i: Int) => tGrade.giveGrade(tt, i)
+      },
+      giveGenderFn = {
+        case (Inl(hh), a: Int, b: Int) => hGrade.value.giveGender(hh, a, b)
+        case (Inr(tt), a: Int, b: Int) => tGrade.giveGender(tt, a, b)
+      }
+    )
+  }
+
+  def testCo[T, R](t: T)(implicit
+                         gen: Generic.Aux[T, R],
+                         grade: Grade[R]): String = {
+    val ttype = gen.to(t)
+    grade.giveGrade(ttype, 1)
+  }
+
+  implicit def genericInstance[A, R](
+                                      implicit
+                                      gen: Generic.Aux[A, R],
+                                      rInstance: Lazy[Grade[R]]
+                                    ): Grade[A] = {
+    createGrade[A](
+      giveGradeFn = (t, a) => rInstance.value.giveGrade(gen.to(t), a),
+      giveGenderFn = (t, a, b) => rInstance.value.giveGender(gen.to(t), a, b)
+    )
+  }
+
+  implicit val gradeForBoy = createGrade[Boy](
+    giveGradeFn = (_, _) => "A",
+    giveGenderFn = (_, _, _) => "Boy"
+  )
+
+  implicit val gradeForGirl = createGrade[Girl](
+    giveGradeFn = (_, _) => "C",
+    giveGenderFn = (_, _, _) => "Girl"
+  )
+
+  "Should be able to ..." in {
+
+    def getGrade[A <: Puple](t: A)(implicit grade: Grade[A]): String =
+      grade.giveGrade(t, 1)
+
+    val andrey = Boy("Andrey").asInstanceOf[Puple]
+    val anna = Girl("Anna", 1).asInstanceOf[Puple]
+
+    testCo(andrey) shouldBe "A"
+    testCo(anna) shouldBe "C"
+
+    getGrade(andrey) shouldBe "A"
+    getGrade(anna) shouldBe "C"
+  }
+}
 
 
-
+/*
 /** JSON ADT */
 sealed abstract class FunJson
 
@@ -195,3 +282,4 @@ object Main extends App {
   println("Optional shapes as AST: " + encodeJson(optShapes))
   println("Optional shapes as JSON: " + FunJson.stringify(encodeJson(optShapes)))
 }
+*/

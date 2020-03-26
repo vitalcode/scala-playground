@@ -1,10 +1,92 @@
-import shapeless.labelled.FieldType
-import shapeless.{:+:, ::, CNil, Coproduct, HList, HNil, Inl, Inr, LabelledGeneric, Lazy, Witness}
+import org.scalatest.{FreeSpec, Matchers}
+import shapeless.{:+:, CNil, Coproduct, Generic, Inl, Inr, _}
+import ops._
 
-import scala.reflect.ClassTag
+class TypeResurrection extends FreeSpec with Matchers {
+
+  sealed trait Puple
+
+  case class Boy(name: String) extends Puple
+
+  case class Girl(name: String) extends Puple
+
+  trait Grade[T] {
+    def giveGrade(t: T): String
+  }
+
+  def apply[T](t: T)(implicit grade: Grade[T]) = grade
+
+  def createGrade[T](func: T => String): Grade[T] =
+    new Grade[T] {
+      def giveGrade(t: T): String = func(t)
+    }
+
+  implicit val gradeForBoy = new Grade[Boy] {
+    override def giveGrade(t: Boy) = "A"
+  }
+
+  implicit val gradeForGirl = new Grade[Girl] {
+    override def giveGrade(t: Girl) = "C"
+  }
+
+  "Should be able to ..." in {
+
+    val gen = Generic[Puple]
+
+    implicit val cnilEncoder: Grade[CNil] = new Grade[CNil] {
+      override def giveGrade(t: CNil) = throw new Exception("Inconceivable!")
+    }
+
+    implicit def coproductEncoder[H, T <: Coproduct](implicit
+                                                     hGrade: Grade[H],
+                                                     tGrade: Grade[T]
+                                                    ): Grade[H :+: T] = createGrade {
+      case Inl(h) => hGrade.giveGrade(h)
+      case Inr(t) => tGrade.giveGrade(t)
+    }
+
+    def apply[T](t: T)(implicit grade: Grade[T]) = grade
+
+    def test[H](puple: H)(implicit grade: Grade[H]): String = {
+      grade.giveGrade(puple)
+    }
+
+    def testCo[H <: Coproduct](puple: H)(implicit grade: Grade[H]): String = {
+      grade.giveGrade(puple)
+    }
+
+    val andrey = Boy("Andrey").asInstanceOf[Puple]
+    val anna = Girl("Anna").asInstanceOf[Puple]
+
+    val b = gen.to(andrey) match {
+      case Inl(t) => t
+    }
+    val g = gen.to(anna) match {
+      case Inr(Inl(t)) => t
+    }
+
+//    implicit def genericTest[A, B, R <: Coproduct](pp: A)(implicit gen: Generic.Aux[A, R]) =
+//      gen.to(pp).tail
+//
+//    val gg = genericTest(anna)
 
 
+//    def instance[C <: Coproduct, H](co: C): H  = co match {
+//      case Inl(t) => test(t).asInstanceOf[H]
+//      case Inr(t: Coproduct) => instance(t)
+//    }
 
+    //instance(gen.to(anna)) shouldBe "A"
+
+    //testCo(gen.to(andrey)) shouldBe "A"
+
+    test(b) shouldBe "A"
+    test(g) shouldBe "C"
+
+  }
+}
+
+/*
 /** JSON ADT */
 sealed abstract class FunJson
 
@@ -195,3 +277,4 @@ object Main extends App {
   println("Optional shapes as AST: " + encodeJson(optShapes))
   println("Optional shapes as JSON: " + FunJson.stringify(encodeJson(optShapes)))
 }
+*/

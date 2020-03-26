@@ -1,4 +1,5 @@
 import org.scalatest._
+
 import scala.annotation.tailrec
 
 class SortAlgorithmsTest extends FreeSpec with Matchers {
@@ -21,20 +22,41 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
   "Insertion sort 2: O(n^2)" in {
     //https://github.com/vkostyukov/scalacaster/blob/master/src/sort/InsertionSort.scala
 
-    def isort[A <% Ordered[A]](list: List[A]): List[A] = {
+    def isort[A](list: List[A])(implicit o: A => Ordered[A]): List[A] = {
       def sort(as: List[A], bs: List[A]): List[A] = as match {
         case h :: t => sort(t, insert(h, bs))
         case Nil => bs
       }
 
       def insert(a: A, as: List[A]): List[A] = as match {
-        case h :: t if (a > h) => h :: insert(a, t)
+        case h :: t if a > h => h :: insert(a, t)
         case _ => a :: as
       }
 
       sort(list, Nil)
     }
+
     isort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
+  }
+
+  "Insertion sort 3: O(n^2)" in {
+
+    @tailrec
+    def inSort(list: List[Int], result: List[Int] = Nil): List[Int] = list match {
+      case h :: tail =>
+        inSort(tail, in(h, result))
+      case Nil =>
+        result
+    }
+
+    def in(e: Int, list: List[Int]): List[Int] = list match {
+      case h :: tail if h < e =>
+        h :: in(e, tail)
+      case _ =>
+        e :: list
+    }
+
+    inSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
 
   "Selection sort: O(n^2)" in {
@@ -47,6 +69,7 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
           val ys = maximum(xs)
           selectionSortHelper(ys.tail, ys.head :: accumulator)
         }
+
       selectionSortHelper(xs, Nil)
     }
 
@@ -103,6 +126,40 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
     }
 
     selectionSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
+  }
+
+  "Selection sort 4: O(n^2)" in {
+    @tailrec
+    def selSort(list: List[Int], result: List[Int] = Nil): List[Int] = list match {
+      case h :: tail =>
+        val m = max(tail, h)
+        selSort(remove(list, m), m :: result)
+      case _ =>
+        result
+    }
+
+
+    def remove(list: List[Int], e: Int): List[Int] = list match {
+      case h :: tail if h == e =>
+        tail
+      case h :: tail =>
+        h :: remove(tail, e)
+      case Nil =>
+        Nil
+
+    }
+
+    @tailrec
+    def max(list: List[Int], current: Int): Int = list match {
+      case h :: tail if h > current =>
+        max(tail, h)
+      case _ :: tail =>
+        max(tail, current)
+      case _ =>
+        current
+    }
+
+    selSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
 
   "Merge Sort Ο(n log n)" in {
@@ -162,14 +219,12 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
         case Nil => Nil
         case x :: xs =>
           val (before, after) = xs partition (_ < x)
-          qsort(before) ++ (x :: qsort(after))
+          qsort(before) ::: (x :: qsort(after))
       }
     }
 
     qsort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
-
-
 
 
   // Bubble sort https://www.tutorialspoint.com/data_structures_algorithms/bubble_sort_algorithm.htm]]
@@ -207,14 +262,12 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
           if (a > b) bubble(a :: xs, b :: rest, sorted)
           else bubble(b :: xs, a :: rest, sorted)
       }
+
       bubble(xt, Nil, Nil)
     }
 
     bubbleSort(List(1, 4, 7, 3, 4, 2, 8, 9, 32, 13, 4)) shouldEqual List(1, 2, 3, 4, 4, 4, 7, 8, 9, 13, 32)
   }
-
-
-
 
 
   // https://interactivepython.org/runestone/static/pythonds/SortSearch/TheBinarySearch.html
@@ -230,6 +283,7 @@ class SortAlgorithmsTest extends FreeSpec with Matchers {
         case mid if a(mid) < v => recurse(mid + 1, high)
         case mid => Some(mid)
       }
+
       recurse(0, a.size - 1)
     }
 
